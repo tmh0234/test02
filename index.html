@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>数据看板</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f7fb;
+        --surface: #ffffff;
+        --ink: #172033;
+        --muted: #667085;
+        --line: #dde4ee;
+        --accent: #1769e8;
+        --accent-strong: #0f55c7;
+        --shadow: 0 10px 30px rgba(23, 32, 51, 0.09);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        overflow: hidden;
+        background:
+          linear-gradient(135deg, rgba(23, 105, 232, 0.08), transparent 34%),
+          linear-gradient(315deg, rgba(28, 156, 128, 0.08), transparent 30%),
+          var(--bg);
+        color: var(--ink);
+        font-family:
+          ui-sans-serif,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
+      .shell {
+        display: grid;
+        grid-template-rows: 64px minmax(0, 1fr);
+        height: 100dvh;
+        min-height: 520px;
+        padding: 12px;
+        gap: 10px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        min-width: 0;
+        border: 1px solid rgba(221, 228, 238, 0.88);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(14px);
+        padding: 0 16px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .mark {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background:
+          linear-gradient(145deg, #1769e8, #14a37f),
+          #1769e8;
+        box-shadow: 0 8px 18px rgba(23, 105, 232, 0.24);
+        position: relative;
+        flex: 0 0 auto;
+      }
+
+      .mark::after {
+        content: "";
+        position: absolute;
+        inset: 9px 8px 8px 9px;
+        border-right: 3px solid rgba(255, 255, 255, 0.92);
+        border-bottom: 3px solid rgba(255, 255, 255, 0.92);
+        transform: rotate(-45deg);
+      }
+
+      h1 {
+        margin: 0;
+        min-width: 0;
+        font-size: 18px;
+        line-height: 1.2;
+        font-weight: 700;
+        letter-spacing: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--muted);
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #14a37f;
+        box-shadow: 0 0 0 5px rgba(20, 163, 127, 0.12);
+      }
+
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 38px;
+        min-width: 38px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--ink);
+        cursor: pointer;
+        text-decoration: none;
+        transition:
+          transform 150ms ease,
+          border-color 150ms ease,
+          background 150ms ease;
+      }
+
+      .button:hover {
+        transform: translateY(-1px);
+        border-color: rgba(23, 105, 232, 0.45);
+        background: #f8fbff;
+      }
+
+      .button.primary {
+        gap: 8px;
+        padding: 0 14px;
+        border-color: var(--accent);
+        background: var(--accent);
+        color: #ffffff;
+        font-weight: 650;
+      }
+
+      .button.primary:hover {
+        border-color: var(--accent-strong);
+        background: var(--accent-strong);
+      }
+
+      .icon {
+        width: 18px;
+        height: 18px;
+        display: block;
+      }
+
+      .frame-wrap {
+        position: relative;
+        min-height: 0;
+        border: 1px solid rgba(221, 228, 238, 0.95);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      .loading {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(180deg, #ffffff, #f6f8fc);
+        color: var(--muted);
+        font-size: 14px;
+        z-index: 1;
+        transition:
+          opacity 200ms ease,
+          visibility 200ms ease;
+      }
+
+      .loading.hidden {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      .spinner {
+        width: 32px;
+        height: 32px;
+        margin: 0 auto 12px;
+        border-radius: 50%;
+        border: 3px solid #dbe5f3;
+        border-top-color: var(--accent);
+        animation: spin 900ms linear infinite;
+      }
+
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        display: block;
+        background: #ffffff;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 700px) {
+        .shell {
+          grid-template-rows: auto minmax(0, 1fr);
+          padding: 8px;
+          min-height: 100dvh;
+        }
+
+        .topbar {
+          align-items: flex-start;
+          flex-direction: column;
+          padding: 12px;
+          gap: 12px;
+        }
+
+        .actions {
+          width: 100%;
+        }
+
+        .button.primary {
+          flex: 1;
+        }
+
+        .status {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="mark" aria-hidden="true"></div>
+          <div>
+            <h1>数据看板</h1>
+            <div class="status"><span class="dot"></span><span>外部展示视图</span></div>
+          </div>
+        </div>
+        <div class="actions">
+          <a class="button primary" id="openDashboard" href="#" target="_blank" rel="noopener">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M7 17L17 7M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            新窗口打开
+          </a>
+        </div>
+      </header>
+
+      <section class="frame-wrap" aria-label="数据看板内容">
+        <div class="loading" id="loading">
+          <div>
+            <div class="spinner" aria-hidden="true"></div>
+            正在加载看板
+          </div>
+        </div>
+        <iframe
+          id="dashboardFrame"
+          title="数据看板"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="clipboard-read; clipboard-write; fullscreen"
+          allowfullscreen
+        ></iframe>
+      </section>
+    </main>
+
+    <script>
+      const jwtToken =
+        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoib3BlbmFwaSIsInVzZXJuYW1lIjoiMjEwMDE3Mjc5MyIsInVzZXJfcGF5bG9hZCI6e30sImV4cCI6MTc3ODU4NjgzMSwiY2xpZW50X2lkIjoiZTQzNTc0ZjVjZDliM2IwYmU0OWFjMDA3ZmU2YjgxNmEifQ.qtw47IErSDxFKi3BmnrlIBVmnuPPxLLUH4pGHnwFobTBs_AZ6RBU8rTZP1YVVlDIaHjwPviklMNjtSmhQvFP9jUMaY91T0wbNqAbhP1-NEbrQSBPxdu6vXEwh-rU3iMa8YaUPqsFFZFO7Zw7xTPN8UwSbFmkpgTd1cRvyiMWZBewfyRspaBMBAMuGbUmR2WHmj2PLhuzV8fPzLLDnAyumIH3_Y6PM0pwPO3FXIrMrHUZ4l0sJNprSMPxrD6xheeOoqLLiKVw5ZxHxJSMjs2tr_q14Vu1cFsOE0GtBp-LDZ6DjnhA_XUc2KsfVFLtJ6bndUFLAMExEMp_JXZMfztzjvIm7Y2sZEtoe0zIYn3VQE2uIE37gv7HKxg9fj6KzuSuBeaMnsVn5xLvyHWk9LWqJbFJwl_ZL1rUw4_iChOxmvbrzif8G_IPao_w6rzXU7bVXQdrZErP2dx-UYCWmO78AXpvNdCYQd2YjkUV_6Zoz92uyRdcr8MvLw8cI5JP82QoqGr3MzVItFceFDuGuOENw7n8TLAJMkJHnc1UZX2sQKKz8gpA2j93PuRwLkm7apnUZN-hQVfTMwTksW3tAv-fRPF_9m6nlFCch9NNa2mgZ9UmTt28M4Ux5uQELxmu4TqeomU1wJzKiVqpxTLc0_GlDuBd8tByjsrSIo4o47l3DRQ";
+
+      const feature = {
+        dashboard: {
+          showTitle: true,
+          showOwner: false,
+          showActions: false,
+          sheetType: "all",
+          sheetList: [],
+          showHeader: true,
+          showFavor: false,
+          actions: [],
+          report: {
+            showTitle: true,
+            showTips: false,
+            showToolbar: false,
+            showHeader: true,
+            enableEnterVizQuery: true,
+            actions: [
+              "excelExport",
+              "FullScreen",
+              "imgExport",
+              "copyToDashboard",
+              "embed",
+              "comment",
+              "viewReport",
+              "createMonitor",
+              "UserContract",
+              "CustomFields",
+              "Refresh",
+            ],
+          },
+          enableComment: false,
+          sheet: {},
+        },
+      };
+
+      const params = new URLSearchParams({
+        aeolusToMobile: "0",
+        appId: "1000141",
+        jwtToken,
+        feature: JSON.stringify(feature),
+        inline: "true",
+        region: "cn-shanghai",
+        sheetId: "370872",
+      });
+
+      const dashboardUrl =
+        "https://console.volcengine.com/bi/datawind-open/pages/external/dashboard/240491?" +
+        params.toString();
+
+      const frame = document.querySelector("#dashboardFrame");
+      const loading = document.querySelector("#loading");
+      const openDashboard = document.querySelector("#openDashboard");
+
+      frame.src = dashboardUrl;
+      openDashboard.href = dashboardUrl;
+
+      frame.addEventListener("load", () => {
+        loading.classList.add("hidden");
+      });
+    </script>
+  </body>
+</html>
