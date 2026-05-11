@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一个现代简洁的待办清单网页。">
+  <meta name="theme-color" content="#f7f3ea">
+  <title>待办清单</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="app-shell">
+    <section class="todo-panel" aria-labelledby="page-title">
+      <div class="panel-heading">
+        <p class="eyebrow">Focus list</p>
+        <h1 id="page-title">今日待办</h1>
+      </div>
+
+      <form class="todo-form" id="todo-form" novalidate>
+        <label class="sr-only" for="todo-input">输入新任务</label>
+        <input
+          id="todo-input"
+          class="todo-input"
+          type="text"
+          placeholder="写下下一件要完成的事"
+          autocomplete="off"
+        >
+        <button class="add-button" type="submit">添加</button>
+      </form>
+
+      <p class="form-message" id="form-message" role="status" aria-live="polite"></p>
+
+      <ul class="todo-list" id="todo-list" aria-label="待办任务列表"></ul>
+
+      <p class="empty-state" id="empty-state">还没有任务。先添加一件小事吧。</p>
+    </section>
+  </main>
+
+  <script src="./script.js"></script>
+</body>
+</html>
